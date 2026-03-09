@@ -64,6 +64,9 @@ tailscale up \
   --hostname="${TAILSCALE_HOSTNAME:-openclaw-ts2}"
 
 echo "Starting OpenClaw gateway..."
+# Unset token env var so OpenClaw does not auto-enable token auth.
+# Security is handled by Tailscale VPN + openclaw devices approve.
+unset OPENCLAW_GATEWAY_TOKEN
 openclaw gateway --tailscale serve &
 GATEWAY_PID=$!
 
