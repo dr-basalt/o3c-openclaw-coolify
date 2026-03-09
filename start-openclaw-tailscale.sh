@@ -6,6 +6,7 @@ mkdir -p /data/.openclaw /data/workspace /var/lib/tailscale
 cat >/data/.openclaw/openclaw.json <<'JSON'
 {
   "gateway": {
+    "mode": "local",
     "bind": "loopback",
     "port": 18789,
     "tailscale": {
@@ -41,5 +42,4 @@ sleep 5
 
 tailscale up --authkey="${TS_AUTHKEY}" --hostname="${TAILSCALE_HOSTNAME:-openclaw-ts}"
 
-# OpenClaw recommande le mode Serve pour une WebUI tokenless via identité Tailscale
 exec openclaw gateway --tailscale serve
