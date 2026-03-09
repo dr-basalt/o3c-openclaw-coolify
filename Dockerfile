@@ -1,4 +1,5 @@
-FROM coollabsio/openclaw:2026.2.6
+#FROM coollabsio/openclaw:2026.2.6
+FROM coollabsio/openclaw-base:2026.3.8
 
 USER root
 
