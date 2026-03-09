@@ -2,7 +2,7 @@ services:
   openclaw:
     build:
       context: .
-      dockerfile: Dockerfile.openclaw-dual
+      dockerfile: Dockerfile.openclaw-tailscale
     restart: unless-stopped
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
