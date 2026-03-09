@@ -61,7 +61,9 @@ tailscale up \
 # Start OpenClaw Gateway
 ############################################
 
-openclaw gateway --tailscale serve &
+# Bloques sur la ws://fqdn tailscale dans l'app android malgré approve id
+#openclaw gateway --tailscale serve &
+openclaw gateway &
 
 ############################################
 # Wait for gateway to start
