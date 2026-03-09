@@ -2,18 +2,16 @@ services:
   openclaw:
     build:
       context: .
-      dockerfile: Dockerfile.openclaw-tailscale
+      dockerfile: Dockerfile.openclaw-dual
     restart: unless-stopped
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TAILSCALE_HOSTNAME=${TAILSCALE_HOSTNAME:-openclaw-ts}
 
-      - OPENCLAW_STATE_DIR=/data/.openclaw
-      - OPENCLAW_WORKSPACE_DIR=/data/workspace
-
-      - PORT=8080
-      - OPENCLAW_GATEWAY_PORT=18789
-      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
+      # UI gateway token (CLI/API)
+      - OPENCLAW_UI_GATEWAY_TOKEN=${OPENCLAW_UI_GATEWAY_TOKEN}
+      # Node gateway token (Android app)
+      - OPENCLAW_NODE_GATEWAY_TOKEN=${OPENCLAW_NODE_GATEWAY_TOKEN}
 
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - OPENCLAW_PRIMARY_MODEL=${OPENCLAW_PRIMARY_MODEL:-openrouter/auto}
@@ -44,24 +42,12 @@ services:
       - BEDROCK_PROVIDER_FILTER=${BEDROCK_PROVIDER_FILTER:-anthropic}
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL}
 
-      - BROWSER_CDP_URL=http://browser:9222
-      - BROWSER_DEFAULT_PROFILE=${BROWSER_DEFAULT_PROFILE:-openclaw}
-      - BROWSER_EVALUATE_ENABLED=${BROWSER_EVALUATE_ENABLED:-true}
-      - BROWSER_SNAPSHOT_MODE=${BROWSER_SNAPSHOT_MODE:-efficient}
-      - BROWSER_REMOTE_TIMEOUT_MS=${BROWSER_REMOTE_TIMEOUT_MS:-1500}
-      - BROWSER_REMOTE_HANDSHAKE_TIMEOUT_MS=${BROWSER_REMOTE_HANDSHAKE_TIMEOUT_MS:-3000}
-
-      - HOOKS_ENABLED=${HOOKS_ENABLED:-false}
-      - HOOKS_PATH=${HOOKS_PATH:-/hooks}
-
+      - OPENCLAW_DOCKER_APT_PACKAGES=${OPENCLAW_DOCKER_APT_PACKAGES}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
       - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
       - SLACK_APP_TOKEN=${SLACK_APP_TOKEN}
       - WHATSAPP_ENABLED=${WHATSAPP_ENABLED}
-      - OPENCLAW_DOCKER_APT_PACKAGES=${OPENCLAW_DOCKER_APT_PACKAGES}
-
-      - OPENCLAW_SKIP_SERVICE_CHECK=true
 
     volumes:
       - openclaw-data:/data
@@ -70,12 +56,6 @@ services:
     depends_on:
       browser:
         condition: service_healthy
-
-    healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:8080/healthz >/dev/null || exit 1"]
-      interval: 10s
-      timeout: 10s
-      retries: 10
 
   browser:
     image: coollabsio/openclaw-browser:latest
