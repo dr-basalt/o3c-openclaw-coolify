@@ -8,9 +8,17 @@ services:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TAILSCALE_HOSTNAME=${TAILSCALE_HOSTNAME:-openclaw-ts}
 
+      - OPENCLAW_STATE_DIR=/data/.openclaw
+      - OPENCLAW_WORKSPACE_DIR=/data/workspace
+
+      - PORT=8080
+      - OPENCLAW_GATEWAY_PORT=18789
+
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENCLAW_PRIMARY_MODEL=${OPENCLAW_PRIMARY_MODEL:-openrouter/auto}
+
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - XAI_API_KEY=${XAI_API_KEY}
       - GROQ_API_KEY=${GROQ_API_KEY}
@@ -26,7 +34,7 @@ services:
       - SYNTHETIC_API_KEY=${SYNTHETIC_API_KEY}
       - COPILOT_GITHUB_TOKEN=${COPILOT_GITHUB_TOKEN}
       - XIAOMI_API_KEY=${XIAOMI_API_KEY}
-      - OPENCLAW_PRIMARY_MODEL=${OPENCLAW_PRIMARY_MODEL:-openrouter/auto}
+
       - DEEPGRAM_API_KEY=${DEEPGRAM_API_KEY}
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
@@ -34,11 +42,6 @@ services:
       - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
       - BEDROCK_PROVIDER_FILTER=${BEDROCK_PROVIDER_FILTER:-anthropic}
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL}
-
-      - PORT=8080
-      - OPENCLAW_GATEWAY_PORT=18789
-      - OPENCLAW_STATE_DIR=/data/.openclaw
-      - OPENCLAW_WORKSPACE_DIR=/data/workspace
 
       - BROWSER_CDP_URL=http://browser:9222
       - BROWSER_DEFAULT_PROFILE=${BROWSER_DEFAULT_PROFILE:-openclaw}
@@ -49,8 +52,6 @@ services:
 
       - HOOKS_ENABLED=${HOOKS_ENABLED:-false}
       - HOOKS_PATH=${HOOKS_PATH:-/hooks}
-      - MOONSHOT_BASE_URL=${MOONSHOT_BASE_URL:-https://api.moonshot.ai/v1}
-      - KIMI_BASE_URL=${KIMI_BASE_URL:-https://api.moonshot.ai/anthropic}
 
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
@@ -59,24 +60,24 @@ services:
       - WHATSAPP_ENABLED=${WHATSAPP_ENABLED}
       - OPENCLAW_DOCKER_APT_PACKAGES=${OPENCLAW_DOCKER_APT_PACKAGES}
 
+      - OPENCLAW_SKIP_SERVICE_CHECK=true
+
     volumes:
-      - 'openclaw-data:/data'
-      - 'tailscale-state:/var/lib/tailscale'
+      - openclaw-data:/data
+      - tailscale-state:/var/lib/tailscale
 
     depends_on:
       browser:
         condition: service_healthy
 
     healthcheck:
-      test:
-        - CMD-SHELL
-        - 'curl -sf http://127.0.0.1:8080/healthz >/dev/null || exit 1'
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:8080/healthz >/dev/null || exit 1"]
       interval: 10s
       timeout: 10s
-      retries: 5
+      retries: 10
 
   browser:
-    image: 'coollabsio/openclaw-browser:latest'
+    image: coollabsio/openclaw-browser:latest
     restart: unless-stopped
     environment:
       - PUID=1000
@@ -84,12 +85,10 @@ services:
       - TZ=Etc/UTC
       - CHROME_CLI=--remote-debugging-port=9222
     volumes:
-      - 'browser-data:/config'
+      - browser-data:/config
     shm_size: 2g
     healthcheck:
-      test:
-        - CMD-SHELL
-        - "bash -c ':> /dev/tcp/127.0.0.1/9222' || exit 1"
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/9222' || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 10
