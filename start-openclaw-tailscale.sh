@@ -3,7 +3,6 @@ set -euo pipefail
 
 mkdir -p /data/.openclaw /data/workspace /var/lib/tailscale
 
-: "${OPENCLAW_GATEWAY_TOKEN:?OPENCLAW_GATEWAY_TOKEN required}"
 : "${TS_AUTHKEY:?TS_AUTHKEY required}"
 
 export OPENCLAW_CONFIG_PATH=/data/.openclaw/openclaw.json
@@ -20,9 +19,7 @@ cat >"${OPENCLAW_CONFIG_PATH}" <<JSON
       "mode": "serve"
     },
     "auth": {
-      "mode": "token",
-      "token": "${OPENCLAW_GATEWAY_TOKEN}",
-      "allowTailscale": true
+      "mode": "none"
     },
     "controlUi": {
       "allowedOrigins": [
@@ -87,8 +84,6 @@ if ! curl -fsS http://127.0.0.1:18789/ >/dev/null 2>&1; then
   wait "${GATEWAY_PID}" || true
   exit 1
 fi
-
-export OPENCLAW_GATEWAY_TOKEN="${OPENCLAW_GATEWAY_TOKEN}"
 
 echo "Auto-approving latest pending device if any..."
 openclaw devices approve --latest || true
