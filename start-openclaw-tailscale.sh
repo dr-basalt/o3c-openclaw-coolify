@@ -6,7 +6,11 @@ mkdir -p /data/.openclaw /data/workspace /var/lib/tailscale
 : "${OPENCLAW_GATEWAY_TOKEN:?OPENCLAW_GATEWAY_TOKEN required}"
 : "${TS_AUTHKEY:?TS_AUTHKEY required}"
 
-cat >/data/.openclaw/openclaw.json <<JSON
+export OPENCLAW_CONFIG_PATH=/data/.openclaw/openclaw.json
+export OPENCLAW_STATE_DIR=/data/.openclaw
+export OPENCLAW_WORKSPACE_DIR=/data/workspace
+
+cat >"${OPENCLAW_CONFIG_PATH}" <<JSON
 {
   "gateway": {
     "mode": "local",
@@ -53,6 +57,9 @@ cat >/data/.openclaw/openclaw.json <<JSON
 }
 JSON
 
+echo "Using config:"
+cat "${OPENCLAW_CONFIG_PATH}"
+
 echo "Starting tailscaled..."
 tailscaled --state=/var/lib/tailscale/tailscaled.state --tun=userspace-networking &
 sleep 5
@@ -64,12 +71,22 @@ tailscale up \
 
 echo "Starting OpenClaw gateway..."
 openclaw gateway --tailscale serve &
+GATEWAY_PID=$!
 
-echo "Waiting for OpenClaw gateway..."
-until curl -fsS http://127.0.0.1:8080/healthz >/dev/null 2>&1 || \
-      curl -fsS http://127.0.0.1:18789 >/dev/null 2>&1; do
+echo "Waiting for OpenClaw gateway on 127.0.0.1:18789..."
+for i in $(seq 1 60); do
+  if curl -fsS http://127.0.0.1:18789/ >/dev/null 2>&1; then
+    break
+  fi
   sleep 2
 done
+
+if ! curl -fsS http://127.0.0.1:18789/ >/dev/null 2>&1; then
+  echo "OpenClaw gateway did not start correctly."
+  ps ufax || true
+  wait "${GATEWAY_PID}" || true
+  exit 1
+fi
 
 export OPENCLAW_GATEWAY_TOKEN="${OPENCLAW_GATEWAY_TOKEN}"
 
