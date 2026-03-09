@@ -6,10 +6,6 @@ mkdir -p /data/.openclaw /data/workspace /var/lib/tailscale
 : "${OPENCLAW_GATEWAY_TOKEN:?OPENCLAW_GATEWAY_TOKEN required}"
 : "${TS_AUTHKEY:?TS_AUTHKEY required}"
 
-############################################
-# Generate OpenClaw config
-############################################
-
 cat >/data/.openclaw/openclaw.json <<JSON
 {
   "gateway": {
@@ -23,6 +19,17 @@ cat >/data/.openclaw/openclaw.json <<JSON
       "mode": "token",
       "token": "${OPENCLAW_GATEWAY_TOKEN}",
       "allowTailscale": true
+    },
+    "controlUi": {
+      "allowedOrigins": [
+        "https://${TAILSCALE_HOSTNAME:-openclaw-ts}.tail0e5c46.ts.net",
+        "https://openclaw-ts.tail0e5c46.ts.net",
+        "https://openclaw-ts2.tail0e5c46.ts.net",
+        "https://openclaw-ts-2.tail0e5c46.ts.net",
+        "https://appassets.androidplatform.net",
+        "app://android",
+        "null"
+      ]
     }
   },
   "agents": {
@@ -46,50 +53,28 @@ cat >/data/.openclaw/openclaw.json <<JSON
 }
 JSON
 
-############################################
-# Start tailscale
-############################################
-
+echo "Starting tailscaled..."
 tailscaled --state=/var/lib/tailscale/tailscaled.state --tun=userspace-networking &
 sleep 5
 
+echo "Connecting to Tailscale..."
 tailscale up \
   --authkey="${TS_AUTHKEY}" \
-  --hostname="${TAILSCALE_HOSTNAME:-openclaw-ts}"
+  --hostname="${TAILSCALE_HOSTNAME:-openclaw-ts2}"
 
-############################################
-# Start OpenClaw Gateway
-############################################
-
-# Bloques sur la ws://fqdn tailscale dans l'app android malgré approve id
-#openclaw gateway --tailscale serve &
-openclaw gateway &
-
-############################################
-# Wait for gateway to start
-############################################
+echo "Starting OpenClaw gateway..."
+openclaw gateway --tailscale serve &
 
 echo "Waiting for OpenClaw gateway..."
-
-until curl -s http://127.0.0.1:18789 >/dev/null; do
+until curl -fsS http://127.0.0.1:18789/health >/dev/null 2>&1 || \
+      curl -fsS http://127.0.0.1:18789 >/dev/null 2>&1; do
   sleep 2
 done
 
-############################################
-# Auto approve device pairing
-############################################
-
 export OPENCLAW_GATEWAY_TOKEN="${OPENCLAW_GATEWAY_TOKEN}"
 
-echo "Auto approving device if pending..."
-
-sleep 3
-
-openclaw devices list || true
+echo "Auto-approving latest pending device if any..."
 openclaw devices approve --latest || true
 
-############################################
-# Keep container alive
-############################################
-
+echo "OpenClaw + Tailscale ready."
 wait -n
