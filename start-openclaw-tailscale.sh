@@ -22,7 +22,7 @@ cat >/data/.openclaw/openclaw.json <<JSON
     },
     "controlUi": {
       "allowedOrigins": [
-        "https://${TAILSCALE_HOSTNAME:-openclaw-ts}.tail0e5c46.ts.net",
+        "https://${TAILSCALE_HOSTNAME:-openclaw-ts2}.tail0e5c46.ts.net",
         "https://openclaw-ts.tail0e5c46.ts.net",
         "https://openclaw-ts2.tail0e5c46.ts.net",
         "https://openclaw-ts-2.tail0e5c46.ts.net",
@@ -66,7 +66,7 @@ echo "Starting OpenClaw gateway..."
 openclaw gateway --tailscale serve &
 
 echo "Waiting for OpenClaw gateway..."
-until curl -fsS http://127.0.0.1:18789/health >/dev/null 2>&1 || \
+until curl -fsS http://127.0.0.1:8080/healthz >/dev/null 2>&1 || \
       curl -fsS http://127.0.0.1:18789 >/dev/null 2>&1; do
   sleep 2
 done
