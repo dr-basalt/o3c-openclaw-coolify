@@ -18,9 +18,6 @@ cat >"${OPENCLAW_CONFIG_PATH}" <<JSON
     "tailscale": {
       "mode": "serve"
     },
-    "auth": {
-      "mode": "none"
-    },
     "controlUi": {
       "allowedOrigins": [
         "https://${TAILSCALE_HOSTNAME:-openclaw-ts2}.tail0e5c46.ts.net",
