@@ -3,7 +3,10 @@ set -euo pipefail
 
 mkdir -p /data/.openclaw /data/workspace /var/lib/tailscale
 
-cat >/data/.openclaw/openclaw.json <<'JSON'
+: "${OPENCLAW_GATEWAY_TOKEN:?OPENCLAW_GATEWAY_TOKEN is required}"
+: "${TS_AUTHKEY:?TS_AUTHKEY is required}"
+
+cat >/data/.openclaw/openclaw.json <<JSON
 {
   "gateway": {
     "mode": "local",
@@ -13,6 +16,8 @@ cat >/data/.openclaw/openclaw.json <<'JSON'
       "mode": "serve"
     },
     "auth": {
+      "mode": "token",
+      "token": "${OPENCLAW_GATEWAY_TOKEN}",
       "allowTailscale": true
     }
   },
