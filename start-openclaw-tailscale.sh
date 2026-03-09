@@ -18,11 +18,6 @@ cat >"${OPENCLAW_CONFIG_PATH}" <<JSON
     "tailscale": {
       "mode": "serve"
     },
-    "trustedProxies": ["127.0.0.1"],
-    "auth": {
-      "mode": "token",
-      "allowTailscale": true
-    },
     "controlUi": {
       "allowedOrigins": [
         "https://${TAILSCALE_HOSTNAME:-openclaw-ts2}.tail0e5c46.ts.net",
