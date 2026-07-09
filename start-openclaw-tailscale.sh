@@ -40,7 +40,7 @@ cat >"${OPENCLAW_CONFIG_PATH}" <<JSON
     "defaults": {
       "workspace": "/data/workspace",
       "model": {
-        "primary": "openrouter/auto"
+        "primary": "${OPENCLAW_PRIMARY_MODEL:-openai/gpt-5.4-mini}"
       }
     }
   },
