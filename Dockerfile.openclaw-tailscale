@@ -16,6 +16,15 @@ RUN apt-get update && apt-get install -y \
     && apt-get install -y tailscale \
     && rm -rf /var/lib/apt/lists/*
 
+# Pin Gemini realtime default model: upstream default is gemini-2.5-flash-native-audio,
+# but gemini-3.1-flash-live-preview works with the responseModalities:["AUDIO"] setup
+# OpenClaw sends. The grep guard fails the build (not a silent no-op) if a version bump
+# renames the constant, so we notice and update the pin.
+RUN sed -i 's#gemini-2.5-flash-native-audio-preview-12-2025#gemini-3.1-flash-live-preview#' \
+      /opt/openclaw/app/dist/extensions/google/realtime-voice-provider.js \
+    && grep -q 'gemini-3.1-flash-live-preview' \
+      /opt/openclaw/app/dist/extensions/google/realtime-voice-provider.js
+
 COPY start-openclaw-tailscale.sh /usr/local/bin/start-openclaw-tailscale.sh
 RUN chmod +x /usr/local/bin/start-openclaw-tailscale.sh
 
