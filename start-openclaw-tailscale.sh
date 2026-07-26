@@ -3,6 +3,11 @@ set -euo pipefail
 
 mkdir -p /data/.openclaw /data/workspace /var/lib/tailscale
 
+# Persist root SSH identity (keys/config in /data) across redeploys, so the
+# agent keeps outbound SSH access (e.g. to the archive jump host).
+mkdir -p /data/.ssh && chmod 700 /data/.ssh
+if [ ! -L /root/.ssh ]; then rm -rf /root/.ssh; ln -sfn /data/.ssh /root/.ssh; fi
+
 : "${OPENCLAW_GATEWAY_TOKEN:?OPENCLAW_GATEWAY_TOKEN required}"
 : "${TS_AUTHKEY:?TS_AUTHKEY required}"
 
