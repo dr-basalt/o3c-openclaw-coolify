@@ -10,6 +10,8 @@ export OPENCLAW_CONFIG_PATH=/data/.openclaw/openclaw.json
 export OPENCLAW_STATE_DIR=/data/.openclaw
 export OPENCLAW_WORKSPACE_DIR=/data/workspace
 
+if [ ! -s "${OPENCLAW_CONFIG_PATH}" ]; then
+  echo "No config found; seeding base config from env..."
 cat >"${OPENCLAW_CONFIG_PATH}" <<JSON
 {
   "gateway": {
@@ -56,6 +58,9 @@ cat >"${OPENCLAW_CONFIG_PATH}" <<JSON
   }
 }
 JSON
+else
+  echo "Existing config found; preserving persisted /data state (not clobbering)."
+fi
 
 echo "Using config:"
 cat "${OPENCLAW_CONFIG_PATH}"
