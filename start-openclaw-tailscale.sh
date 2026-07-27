@@ -71,7 +71,7 @@ echo "Using config:"
 cat "${OPENCLAW_CONFIG_PATH}"
 
 echo "Starting tailscaled..."
-tailscaled --state=/var/lib/tailscale/tailscaled.state --tun=userspace-networking &
+tailscaled --state=/var/lib/tailscale/tailscaled.state --tun=userspace-networking --socks5-server=localhost:1055 --outbound-http-proxy-listen=localhost:1055 &
 sleep 5
 
 echo "Connecting to Tailscale..."
