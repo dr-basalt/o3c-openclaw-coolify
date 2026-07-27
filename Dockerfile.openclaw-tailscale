@@ -25,6 +25,9 @@ RUN sed -i 's#gemini-2.5-flash-native-audio-preview-12-2025#gemini-3.1-flash-liv
     && grep -q 'gemini-3.1-flash-live-preview' \
       /opt/openclaw/app/dist/extensions/google/realtime-voice-provider.js
 
+RUN apt-get update && apt-get install -y proxychains4 && rm -rf /var/lib/apt/lists/* && \
+    printf 'strict_chain\nproxy_dns\n[ProxyList]\nsocks5 127.0.0.1 1055\n' > /etc/proxychains4.conf
+
 COPY start-openclaw-tailscale.sh /usr/local/bin/start-openclaw-tailscale.sh
 RUN chmod +x /usr/local/bin/start-openclaw-tailscale.sh
 
